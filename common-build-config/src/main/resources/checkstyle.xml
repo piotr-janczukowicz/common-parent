@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Structure and naming Palantir Java Format does not enforce.
+  Overloads must be adjacent. Methods must appear in visibility order:
+  public, then protected, then package-private, then private.
+-->
+<module name="Checker">
+  <property name="charset" value="UTF-8"/>
+  <property name="severity" value="error"/>
+  <module name="TreeWalker">
+    <module name="AvoidStarImport"/>
+    <module name="DeclarationOrder"/>
+    <module name="EmptyBlock">
+      <property name="option" value="TEXT"/>
+    </module>
+    <module name="FinalLocalVariable"/>
+    <module name="FinalParameters"/>
+    <module name="HiddenField">
+      <property name="tokens" value="VARIABLE_DEF,PATTERN_VARIABLE_DEF"/>
+    </module>
+    <module name="IllegalImport"/>
+    <module name="InnerTypeLast"/>
+    <module name="ModifiedControlVariable"/>
+    <module name="MultipleVariableDeclarations"/>
+    <module name="OneTopLevelClass"/>
+    <module name="OuterTypeFilename"/>
+    <module name="OverloadMethodsDeclarationOrder"/>
+    <!-- DeclarationOrder does not sort methods by access. -->
+    <module name="MatchXpath">
+      <property name="query"
+        value="//CLASS_DEF/OBJBLOCK/METHOD_DEF[(./MODIFIERS/LITERAL_PROTECTED and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC]) or (not(./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or ./MODIFIERS/LITERAL_PRIVATE) and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED]) or (./MODIFIERS/LITERAL_PRIVATE and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or not(./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or ./MODIFIERS/LITERAL_PRIVATE)])]
+              | //RECORD_DEF/OBJBLOCK/METHOD_DEF[(./MODIFIERS/LITERAL_PROTECTED and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC]) or (not(./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or ./MODIFIERS/LITERAL_PRIVATE) and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED]) or (./MODIFIERS/LITERAL_PRIVATE and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or not(./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or ./MODIFIERS/LITERAL_PRIVATE)])]
+              | //ENUM_DEF/OBJBLOCK/METHOD_DEF[(./MODIFIERS/LITERAL_PROTECTED and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC]) or (not(./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or ./MODIFIERS/LITERAL_PRIVATE) and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED]) or (./MODIFIERS/LITERAL_PRIVATE and following-sibling::METHOD_DEF[./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or not(./MODIFIERS/LITERAL_PUBLIC or ./MODIFIERS/LITERAL_PROTECTED or ./MODIFIERS/LITERAL_PRIVATE)])]"/>
+      <message key="matchxpath.match"
+        value="Methods must be declared in order: public, protected, package-private, private"/>
+    </module>
+    <module name="ParameterAssignment"/>
+    <module name="StringLiteralEquality"/>
+    <module name="UpperEll"/>
+  </module>
+</module>
