@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!-- HTTP scheme/host/header names are ASCII; locale-sensitive case mapping is not relevant. -->
+  <Match>
+    <Bug pattern="IMPROPER_UNICODE"/>
+  </Match>
+  <Match>
+    <Annotation name="io.soabase.recordbuilder.core.RecordBuilderGenerated"/>
+  </Match>
+</FindBugsFilter>
