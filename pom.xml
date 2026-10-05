@@ -99,6 +99,22 @@
             </dependency>
           </dependencies>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <configuration>
+            <targetJdk>${java.version}</targetJdk>
+            <failOnViolation>true</failOnViolation>
+            <printFailingErrors>true</printFailingErrors>
+            <includeTests>false</includeTests>
+            <rulesets combine.self="override">
+              <ruleset>${project.basedir}/pmd/pmd-ruleset.xml</ruleset>
+            </rulesets>
+            <compileSourceRoots>
+              <compileSourceRoot>${project.basedir}/src/main/java</compileSourceRoot>
+            </compileSourceRoots>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -134,6 +150,42 @@
                 <goals>
                   <goal>check</goal>
                 </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>pmd-main</id>
+                <phase>process-classes</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+                <configuration>
+                  <rulesets combine.self="override">
+                    <ruleset>${project.basedir}/pmd/pmd-ruleset.xml</ruleset>
+                  </rulesets>
+                  <compileSourceRoots>
+                    <compileSourceRoot>${project.basedir}/src/main/java</compileSourceRoot>
+                  </compileSourceRoots>
+                </configuration>
+              </execution>
+              <execution>
+                <id>pmd-test</id>
+                <phase>process-test-classes</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+                <configuration>
+                  <rulesets combine.self="override">
+                    <ruleset>${project.basedir}/pmd/pmd-test-ruleset.xml</ruleset>
+                  </rulesets>
+                  <compileSourceRoots>
+                    <compileSourceRoot>${project.basedir}/src/test/java</compileSourceRoot>
+                  </compileSourceRoots>
+                </configuration>
               </execution>
             </executions>
           </plugin>
