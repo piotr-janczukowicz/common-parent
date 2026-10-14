@@ -25,8 +25,11 @@ jobs:
   release:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    concurrency:
+      group: release
+      cancel-in-progress: false
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - uses: actions/checkout@v5
@@ -37,10 +40,42 @@ jobs:
           cache: maven
           server-id: github
       - name: Resolve common-dependencies
-        run: mvn -B -s .github/maven-settings.xml dependency:get -Dartifact=pl.piotrjanczukowicz:common-dependencies:1.0.0-SNAPSHOT:pom
+        run: mvn -B -s .github/maven-settings.xml dependency:get -Dartifact=pl.piotrjanczukowicz:common-dependencies:2:pom
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
-      - run: mvn -B deploy
+      - name: Resolve release version
+        id: version
+        run: |
+          current=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout)
+          if [[ ! "$current" =~ ^([0-9]+)-SNAPSHOT$ ]]; then
+            echo "::error::Expected version N-SNAPSHOT with integer N, found '$current'"
+            exit 1
+          fi
+          release=${BASH_REMATCH[1]}
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          echo "next=$((release + 1))-SNAPSHOT" >> "$GITHUB_OUTPUT"
+      - name: Fail if tag exists
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.version.outputs.release }}"; then
+            echo "::error::Tag v${{ steps.version.outputs.release }} already exists"
+            exit 1
+          fi
+      - name: Deploy release
+        run: |
+          mvn -B versions:set -DnewVersion=${{ steps.version.outputs.release }} -DgenerateBackupPoms=false
+          mvn -B deploy
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Tag and create GitHub release
+        run: gh release create "v${{ steps.version.outputs.release }}" --target "$GITHUB_SHA" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Bump to next snapshot
+        run: |
+          git checkout -- pom.xml
+          mvn -B versions:set -DnewVersion=${{ steps.version.outputs.next }} -DgenerateBackupPoms=false
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: Bump version to ${{ steps.version.outputs.next }} [skip ci]"
+          git push origin HEAD:main
