@@ -42,7 +42,7 @@
 
   <properties>
     <!-- Must match this POM version. Plugin dependencies cannot use ${project.version}; that becomes the child's version. -->
-    <common-build-config.version>1.0.0-SNAPSHOT</common-build-config.version>
+    <common-build-config.version>1-SNAPSHOT</common-build-config.version>
   </properties>
 
   <build>
