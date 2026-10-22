@@ -1,9 +1,14 @@
 <settings>
   <servers>
     <server>
-      <id>github</id>
+      <id>github-dependencies</id>
       <username>${env.GITHUB_ACTOR}</username>
       <password>${env.PACKAGES_TOKEN}</password>
+    </server>
+    <server>
+      <id>github</id>
+      <username>${env.GITHUB_ACTOR}</username>
+      <password>${env.GITHUB_TOKEN}</password>
     </server>
   </servers>
   <profiles>
@@ -11,7 +16,7 @@
       <id>github</id>
       <repositories>
         <repository>
-          <id>github</id>
+          <id>github-dependencies</id>
           <url>https://maven.pkg.github.com/piotr-janczukowicz/common-dependencies</url>
           <snapshots>
             <enabled>true</enabled>
