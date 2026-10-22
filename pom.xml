@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>common-parent</artifactId>
-  <version>1-SNAPSHOT</version>
+  <version>2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>common-parent</name>
@@ -42,7 +42,7 @@
 
   <properties>
     <!-- Must match this POM version. Plugin dependencies cannot use ${project.version}; that becomes the child's version. -->
-    <common-build-config.version>1-SNAPSHOT</common-build-config.version>
+    <common-build-config.version>2-SNAPSHOT</common-build-config.version>
   </properties>
 
   <build>
