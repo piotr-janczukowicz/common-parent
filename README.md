@@ -4,13 +4,13 @@ This module is a Maven parent that binds Checkstyle and SpotBugs with shared con
 
 ## Dependency
 
-Java 21 and Maven. Coordinates: `pl.piotrjanczukowicz:common-parent:1.0.0-SNAPSHOT` (`pom`).
+Java 21 and Maven. Coordinates: `pl.piotrjanczukowicz:common-parent:1` (`pom`).
 
 ```xml
 <parent>
   <groupId>pl.piotrjanczukowicz</groupId>
   <artifactId>common-parent</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1</version>
   <relativePath/>
 </parent>
 ```
@@ -25,7 +25,7 @@ Put production Java under `src/main/java`. Maven then runs Checkstyle on `valida
   <parent>
     <groupId>pl.piotrjanczukowicz</groupId>
     <artifactId>common-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1</version>
     <relativePath/>
   </parent>
   <artifactId>example</artifactId>
@@ -34,4 +34,4 @@ Put production Java under `src/main/java`. Maven then runs Checkstyle on `valida
 
 ## License
 
-Apache License, Version 2.0
+MIT License
