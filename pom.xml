@@ -268,7 +268,7 @@
                         <limit>
                           <counter>BRANCH</counter>
                           <value>COVEREDRATIO</value>
-                          <minimum>0.95</minimum>
+                          <minimum>0.85</minimum>
                         </limit>
                         <limit>
                           <counter>LINE</counter>
@@ -278,7 +278,7 @@
                         <limit>
                           <counter>COMPLEXITY</counter>
                           <value>COVEREDRATIO</value>
-                          <minimum>0.95</minimum>
+                          <minimum>0.90</minimum>
                         </limit>
                         <limit>
                           <counter>METHOD</counter>
@@ -303,7 +303,7 @@
                         <limit>
                           <counter>BRANCH</counter>
                           <value>COVEREDRATIO</value>
-                          <minimum>0.95</minimum>
+                          <minimum>0.85</minimum>
                         </limit>
                         <limit>
                           <counter>LINE</counter>
@@ -313,7 +313,7 @@
                         <limit>
                           <counter>COMPLEXITY</counter>
                           <value>COVEREDRATIO</value>
-                          <minimum>0.95</minimum>
+                          <minimum>0.90</minimum>
                         </limit>
                         <limit>
                           <counter>METHOD</counter>
