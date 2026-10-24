@@ -27,27 +27,74 @@
     <module>common-build-config</module>
   </modules>
 
-  <scm>
-    <connection>scm:git:https://github.com/piotr-janczukowicz/common-parent.git</connection>
-    <developerConnection>scm:git:https://github.com/piotr-janczukowicz/common-parent.git</developerConnection>
-    <url>https://github.com/piotr-janczukowicz/common-parent</url>
+  <scm
+      child.scm.connection.inherit.append.path="false"
+      child.scm.developerConnection.inherit.append.path="false"
+      child.scm.url.inherit.append.path="false">
+    <connection>scm:git:https://github.com/piotr-janczukowicz/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:https://github.com/piotr-janczukowicz/${project.artifactId}.git</developerConnection>
+    <url>https://github.com/piotr-janczukowicz/${project.artifactId}</url>
   </scm>
   <distributionManagement>
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/piotr-janczukowicz/common-parent</url>
+      <url>https://maven.pkg.github.com/piotr-janczukowicz/${project.artifactId}</url>
     </repository>
   </distributionManagement>
 
   <properties>
     <!-- Must match this POM version. Plugin dependencies cannot use ${project.version}; that becomes the child's version. -->
     <common-build-config.version>3-SNAPSHOT</common-build-config.version>
+    <!-- Set in a child that tests with Mockito: -javaagent:${org.mockito:mockito-core:jar} (a dependency:properties value). -->
+    <test.agent.args/>
+    <!-- Set in a child whose tests need extra JVM module flags, such as add-modules or add-opens. -->
+    <test.module.args/>
   </properties>
+
+  <!-- Every library that inherits this POM compiles against these and tests with JUnit and AssertJ. A child that needs a
+       different scope or no copy redeclares the artifact. -->
+  <dependencies>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <argLine>@{argLine} ${test.agent.args} ${test.module.args}</argLine>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <configuration>
+            <argLine>@{argLine} ${test.agent.args} ${test.module.args}</argLine>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
@@ -121,6 +168,17 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
