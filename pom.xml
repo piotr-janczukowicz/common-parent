@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>common-parent</artifactId>
-  <version>5-SNAPSHOT</version>
+  <version>6-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>common-parent</name>
@@ -45,7 +45,7 @@
 
   <properties>
     <!-- Must match this POM version. Plugin dependencies cannot use ${project.version}; that becomes the child's version. -->
-    <common-build-config.version>5-SNAPSHOT</common-build-config.version>
+    <common-build-config.version>6-SNAPSHOT</common-build-config.version>
     <!-- Set in a child that tests with Mockito: -javaagent:${org.mockito:mockito-core:jar} (a dependency:properties value). -->
     <test.agent.args/>
     <!-- Set in a child whose tests need extra JVM module flags, such as add-modules or add-opens. -->
