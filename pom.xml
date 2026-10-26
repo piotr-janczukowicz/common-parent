@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>pl.piotrjanczukowicz</groupId>
+    <groupId>io.github.piotr-janczukowicz</groupId>
     <artifactId>common-dependencies</artifactId>
-    <version>2</version>
+    <version>3</version>
     <relativePath/>
   </parent>
 
@@ -105,7 +105,7 @@
               <version>${checkstyle.version}</version>
             </dependency>
             <dependency>
-              <groupId>pl.piotrjanczukowicz</groupId>
+              <groupId>io.github.piotr-janczukowicz</groupId>
               <artifactId>common-build-config</artifactId>
               <version>${common-build-config.version}</version>
             </dependency>
@@ -141,7 +141,7 @@
               <version>${spotbugs.version}</version>
             </dependency>
             <dependency>
-              <groupId>pl.piotrjanczukowicz</groupId>
+              <groupId>io.github.piotr-janczukowicz</groupId>
               <artifactId>common-build-config</artifactId>
               <version>${common-build-config.version}</version>
             </dependency>
