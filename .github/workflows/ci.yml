@@ -43,11 +43,6 @@ jobs:
           java-version: "21"
           cache: maven
           server-id: github
-      - name: Resolve common-dependencies
-        run: mvn -B -s .github/maven-settings.xml dependency:get -Dartifact=pl.piotrjanczukowicz:common-dependencies:2:pom
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
       - name: Resolve release version
         id: version
         run: |
@@ -65,11 +60,29 @@ jobs:
             echo "::error::Tag v${{ steps.version.outputs.release }} already exists"
             exit 1
           fi
-      - name: Deploy release
+      - name: Set release version
         run: |
           mvn -B -s .github/maven-settings.xml versions:set -DnewVersion=${{ steps.version.outputs.release }} -DprocessAllModules -DgenerateBackupPoms=false
           mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion=${{ steps.version.outputs.release }} -DgenerateBackupPoms=false
-          mvn -B -s .github/maven-settings.xml deploy -DdeployAtEnd=false
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Show the imported signing key
+        run: gpg --list-secret-keys --keyid-format long
+      - name: Publish to Maven Central
+        run: mvn -B deploy -Pcentral -Dgpg.keyname=E1A4492D376821D0680C6C758D93BEA6026504E0
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Deploy to GitHub Packages
+        run: mvn -B -s .github/maven-settings.xml deploy -DdeployAtEnd=false -DskipTests
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Tag and create GitHub release
