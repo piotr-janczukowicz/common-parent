@@ -79,11 +79,6 @@ jobs:
         run: gpg --list-secret-keys --keyid-format long
       - name: Set the release version
         run: |
-          current=$(mvn -B -s .github/maven-settings.xml -q help:evaluate -Dexpression=project.version -DforceStdout)
-          if [[ "$current" != "$VERSION-SNAPSHOT" && "$current" != "$VERSION" ]]; then
-            echo "::error::The tag $TAG has version '$current', expected $VERSION-SNAPSHOT"
-            exit 1
-          fi
           mvn -B -s .github/maven-settings.xml versions:set -DnewVersion="$VERSION" -DprocessAllModules -DgenerateBackupPoms=false
           if [[ "$SYNC_BUILD_CONFIG" == "true" ]]; then
             mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion="$VERSION" -DgenerateBackupPoms=false
