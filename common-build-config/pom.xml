@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
 
   <name>common-build-config</name>
-  <description>Shared Checkstyle config loaded from the plugin classpath</description>
+  <description>Shared Checkstyle and PMD test-source configs loaded from the plugin classpath</description>
   <url>https://github.com/piotr-janczukowicz/common-parent</url>
   <licenses>
     <license>

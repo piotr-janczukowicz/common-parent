@@ -1,3 +1,8 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/66957501585041d8a742c01c3d00591b)](https://app.codacy.com/gh/piotr-janczukowicz/common-parent/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Build](https://github.com/piotr-janczukowicz/common-parent/actions/workflows/main.yml/badge.svg)](https://github.com/piotr-janczukowicz/common-parent/actions/workflows/main.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.piotr-janczukowicz/common-parent)](https://central.sonatype.com/artifact/io.github.piotr-janczukowicz/common-parent)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Java 21](https://img.shields.io/badge/Java-21-orange.svg)
 # common-parent
 
 This module is a Maven parent that binds Checkstyle with shared config. Set it as your project parent so that check runs on modules that have Java sources.

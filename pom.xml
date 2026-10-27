@@ -746,5 +746,47 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <!-- Opt-in (-Ppmd-test): runs every PMD rule on test sources, lists the violations and fails the build. The rules come
+           from common-build-config. Declared last so that it overrides pmd-main of the java-sources profile. -->
+      <id>pmd-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <dependencies>
+              <dependency>
+                <groupId>io.github.piotr-janczukowicz</groupId>
+                <artifactId>common-build-config</artifactId>
+                <version>${common-build-config.version}</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <includeTests>true</includeTests>
+              <rulesets combine.self="override">
+                <ruleset>pmd-test-ruleset.xml</ruleset>
+              </rulesets>
+              <compileSourceRoots combine.self="override">
+                <compileSourceRoot>${project.basedir}/src/test/java</compileSourceRoot>
+              </compileSourceRoots>
+            </configuration>
+            <executions>
+              <execution>
+                <id>pmd-main</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>pmd-test</id>
+                <phase>process-test-classes</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
