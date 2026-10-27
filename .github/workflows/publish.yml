@@ -1,0 +1,92 @@
+name: Publish to Maven Central
+
+# Publishes a version that the Release workflow (or a manual release) already tagged: it checks out the tag, builds
+# and signs it, and uploads it to Maven Central. Other repositories call it with:
+#   uses: piotr-janczukowicz/common-parent/.github/workflows/publish.yml@main
+#   with: { tag: "${{ inputs.tag }}" }
+#   secrets: inherit
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to publish, such as v6
+        required: true
+        type: string
+      maven-args:
+        description: Extra Maven arguments
+        required: false
+        type: string
+        default: -pl .
+      sync-build-config:
+        description: Also set common-build-config.version (common-parent only)
+        required: false
+        type: boolean
+        default: true
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      maven-args:
+        required: false
+        type: string
+        default: ""
+      sync-build-config:
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ github.token }}
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+      CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+      CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+      MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      TAG: ${{ inputs.tag }}
+      MAVEN_EXTRA_ARGS: ${{ inputs.maven-args }}
+      SYNC_BUILD_CONFIG: ${{ inputs.sync-build-config }}
+    steps:
+      - name: Check the tag
+        run: |
+          if [[ ! "$TAG" =~ ^v([0-9]+)$ ]]; then
+            echo "::error::The tag must look like v6, found '$TAG'"
+            exit 1
+          fi
+          echo "VERSION=${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v5
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Show the imported signing key
+        run: gpg --list-secret-keys --keyid-format long
+      - name: Set the release version
+        run: |
+          current=$(mvn -B -s .github/maven-settings.xml -q help:evaluate -Dexpression=project.version -DforceStdout)
+          if [[ "$current" != "$VERSION-SNAPSHOT" && "$current" != "$VERSION" ]]; then
+            echo "::error::The tag $TAG has version '$current', expected $VERSION-SNAPSHOT"
+            exit 1
+          fi
+          mvn -B -s .github/maven-settings.xml versions:set -DnewVersion="$VERSION" -DprocessAllModules -DgenerateBackupPoms=false
+          if [[ "$SYNC_BUILD_CONFIG" == "true" ]]; then
+            mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+          fi
+      - name: Publish to Maven Central
+        run: mvn -B -s .github/maven-settings.xml deploy -Pcentral -Prelease -Dgpg.keyname=E1A4492D376821D0680C6C758D93BEA6026504E0 $MAVEN_EXTRA_ARGS
