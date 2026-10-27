@@ -1,35 +1,25 @@
-name: CI
+name: Release
 
+# Deploys the next integer version to GitHub Packages, tags it, creates the GitHub release and bumps main to the next
+# snapshot. It runs on every merge to main; common-parent is the only repository that releases automatically.
 on:
-  pull_request:
+  push:
     branches: [main]
   workflow_dispatch:
 
-jobs:
-  verify:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
-      - run: mvn -B -s .github/maven-settings.xml clean verify
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+permissions:
+  contents: write
+  packages: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
   release:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    concurrency:
-      group: release
-      cancel-in-progress: false
-    permissions:
-      contents: write
-      packages: write
+    timeout-minutes: 45
     env:
       GITHUB_ACTOR: ${{ github.actor }}
       GITHUB_TOKEN: ${{ github.token }}
@@ -63,27 +53,8 @@ jobs:
         run: |
           mvn -B -s .github/maven-settings.xml versions:set -DnewVersion=${{ steps.version.outputs.release }} -DprocessAllModules -DgenerateBackupPoms=false
           mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion=${{ steps.version.outputs.release }} -DgenerateBackupPoms=false
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "21"
-          server-id: central
-          server-username: CENTRAL_USERNAME
-          server-password: CENTRAL_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
-      - name: Show the imported signing key
-        run: gpg --list-secret-keys --keyid-format long
-      - name: Publish to Maven Central
-        run: mvn -B deploy -Pcentral -Prelease -pl . -Dgpg.keyname=E1A4492D376821D0680C6C758D93BEA6026504E0
-        env:
-          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Deploy to GitHub Packages
-        run: mvn -B -s .github/maven-settings.xml deploy -DdeployAtEnd=false -Prelease
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        run: mvn -B -s .github/maven-settings.xml deploy -DdeployAtEnd=false -Prelease -Dproject.build.outputTimestamp="$(git log -1 --format=%cI)"
       - name: Tag and create GitHub release
         run: gh release create "v${{ steps.version.outputs.release }}" --target "$GITHUB_SHA" --generate-notes
         env:
