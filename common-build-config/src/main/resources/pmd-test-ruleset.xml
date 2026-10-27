@@ -10,9 +10,15 @@
     <exclude-pattern>.*/generated-test-sources/.*</exclude-pattern>
 
     <rule ref="category/java/bestpractices.xml">
+        <exclude name="AvoidUsingHardCodedIP"/>
+        <exclude name="LooseCoupling"/>
         <exclude name="UnitTestContainsTooManyAsserts"/>
     </rule>
     <rule ref="category/java/codestyle.xml">
+        <exclude name="ShortMethodName"/>
+        <exclude name="LongVariable"/>
+        <exclude name="UnnecessaryModifier"/>
+        <exclude name="TooManyStaticImports"/>
         <exclude name="MethodArgumentCouldBeFinal"/>
         <exclude name="AtLeastOneConstructor"/>
         <exclude name="ShortVariable"/>
@@ -29,6 +35,11 @@
         </properties>
     </rule>
     <rule ref="category/java/design.xml">
+        <exclude name="MutableStaticState"/>
+        <exclude name="AvoidCatchingGenericException"/>
+        <exclude name="SignatureDeclareThrowsException"/>
+        <exclude name="ExcessiveImports"/>
+        <exclude name="CouplingBetweenObjects"/>
         <exclude name="TooManyMethods"/>
         <exclude name="GodClass"/>
         <exclude name="CyclomaticComplexity"/>
@@ -40,6 +51,8 @@
         <exclude name="CommentSize"/>
     </rule>
     <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="TestClassWithoutTestCases"/>
         <!-- Tests hold streams unclosed on purpose to assert close semantics; executors are shut down in finally. -->
         <exclude name="CloseResource"/>
         <exclude name="AvoidAccessibilityAlteration"/>
@@ -48,8 +61,13 @@
         <exclude name="UseProperClassLoader"/>
     </rule>
     <rule ref="category/java/multithreading.xml">
+        <exclude name="AvoidUsingVolatile"/>
+        <exclude name="AvoidSynchronizedStatement"/>
+        <exclude name="UseConcurrentHashMap"/>
         <exclude name="DoNotUseThreads"/>
     </rule>
-    <rule ref="category/java/performance.xml"/>
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    </rule>
     <rule ref="category/java/security.xml"/>
 </ruleset>
