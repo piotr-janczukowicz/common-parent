@@ -1,3 +1,6 @@
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.piotr-janczukowicz/common-parent)](https://central.sonatype.com/artifact/io.github.piotr-janczukowicz/common-parent)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Java 21](https://img.shields.io/badge/Java-21-orange.svg)
 # common-parent
 
 This module is a Maven parent that binds Checkstyle with shared config. Set it as your project parent so that check runs on modules that have Java sources.
