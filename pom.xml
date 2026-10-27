@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
 
   <name>common-parent</name>
-  <description>Parent POM with the shared dependency versions, plugin configuration, quality checks and release profiles, and the Checkstyle/SpotBugs config module</description>
+  <description>Parent POM with the shared dependency versions, plugin configuration, quality checks and release profiles, and the Checkstyle config module</description>
   <url>https://github.com/piotr-janczukowicz/common-parent</url>
   <licenses>
     <license>
@@ -48,8 +48,8 @@
   <properties>
     <!-- Must match this POM version. Plugin dependencies cannot use ${project.version}; that becomes the child's version. -->
     <common-build-config.version>6-SNAPSHOT</common-build-config.version>
-    <!-- Set in a child that tests with Mockito: -javaagent:${org.mockito:mockito-core:jar} (a dependency:properties value). -->
-    <test.agent.args/>
+    <!-- The Mockito agent (a dependency:properties value); every child tests with Mockito. -->
+    <test.agent.args>-javaagent:${org.mockito:mockito-core:jar}</test.agent.args>
     <!-- Set in a child whose tests need extra JVM module flags, such as add-modules or add-opens. -->
     <test.module.args/>
 
@@ -57,18 +57,16 @@
     <argLine/>
     <java.version>21</java.version>
     <maven.compiler.release>${java.version}</maven.compiler.release>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- Libraries -->
-    <commons-collections4.version>4.6.0</commons-collections4.version>
-    <commons-lang3.version>3.21.0</commons-lang3.version>
     <jackson.version>3.2.4</jackson.version>
     <jspecify.version>1.0.1</jspecify.version>
     <okhttp.version>5.5.1</okhttp.version>
     <record.builder.version>53</record.builder.version>
     <slf4j.version>2.0.20</slf4j.version>
-    <spotbugs.version>4.10.5</spotbugs.version>
 
     <!-- Test -->
     <archunit.version>1.5.1</archunit.version>
@@ -83,7 +81,6 @@
     <!-- Plugins -->
     <checkstyle.version>14.3.0</checkstyle.version>
     <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
-    <findsecbugs.version>1.14.0</findsecbugs.version>
     <jacoco.version>0.8.15</jacoco.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
@@ -103,7 +100,6 @@
     <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
     <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
     <palantir-java-format.version>2.97.0</palantir-java-format.version>
-    <spotbugs-maven-plugin.version>4.10.5.0</spotbugs-maven-plugin.version>
     <spotless-maven-plugin.version>3.10.4</spotless-maven-plugin.version>
     <tidy-maven-plugin.version>1.4.1</tidy-maven-plugin.version>
     <versions-maven-plugin.version>2.23.0</versions-maven-plugin.version>
@@ -146,16 +142,6 @@
         <version>${slf4j.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>${commons-lang3.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-collections4</artifactId>
-        <version>${commons-collections4.version}</version>
-      </dependency>
-      <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
         <version>${bytebuddy.version}</version>
@@ -169,17 +155,6 @@
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp-jvm</artifactId>
         <version>${okhttp.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.spotbugs</groupId>
-        <artifactId>spotbugs-annotations</artifactId>
-        <version>${spotbugs.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>io.soabase.record-builder</groupId>
@@ -232,12 +207,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.spotbugs</groupId>
-      <artifactId>spotbugs-annotations</artifactId>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
@@ -245,6 +214,16 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -268,6 +247,14 @@
           <version>${maven-compiler-plugin.version}</version>
           <configuration>
             <release>${maven.compiler.release}</release>
+            <!-- Only acts on types annotated with @RecordBuilder; the record-builder-core dependency stays in the child. -->
+            <annotationProcessorPaths>
+              <path>
+                <groupId>io.soabase.record-builder</groupId>
+                <artifactId>record-builder-processor</artifactId>
+                <version>${record.builder.version}</version>
+              </path>
+            </annotationProcessorPaths>
           </configuration>
         </plugin>
         <plugin>
@@ -339,7 +326,6 @@
                   <exclude>junit:junit</exclude>
                 </excludes>
               </bannedDependencies>
-              <dependencyConvergence/>
               <requireUpperBoundDeps/>
             </rules>
           </configuration>
@@ -391,36 +377,6 @@
             <includeTestSourceDirectory>false</includeTestSourceDirectory>
             <linkXRef>false</linkXRef>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>com.github.spotbugs</groupId>
-          <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>${spotbugs-maven-plugin.version}</version>
-          <configuration>
-            <effort>Default</effort>
-            <threshold>Low</threshold>
-            <failOnError>true</failOnError>
-            <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
-            <plugins>
-              <plugin>
-                <groupId>com.h3xstream.findsecbugs</groupId>
-                <artifactId>findsecbugs-plugin</artifactId>
-                <version>${findsecbugs.version}</version>
-              </plugin>
-            </plugins>
-          </configuration>
-          <dependencies>
-            <dependency>
-              <groupId>com.github.spotbugs</groupId>
-              <artifactId>spotbugs</artifactId>
-              <version>${spotbugs.version}</version>
-            </dependency>
-            <dependency>
-              <groupId>io.github.piotr-janczukowicz</groupId>
-              <artifactId>common-build-config</artifactId>
-              <version>${common-build-config.version}</version>
-            </dependency>
-          </dependencies>
         </plugin>
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
@@ -484,7 +440,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <inherited>false</inherited>
         <executions>
           <execution>
             <id>enforce</id>
@@ -555,7 +510,6 @@
         <jacoco.skip>true</jacoco.skip>
         <pmd.skip>true</pmd.skip>
         <skipTests>true</skipTests>
-        <spotbugs.skip>true</spotbugs.skip>
         <spotless.check.skip>true</spotless.check.skip>
       </properties>
     </profile>
@@ -639,17 +593,6 @@
               <execution>
                 <id>checkstyle-check</id>
                 <phase>validate</phase>
-                <goals>
-                  <goal>check</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>com.github.spotbugs</groupId>
-            <artifactId>spotbugs-maven-plugin</artifactId>
-            <executions>
-              <execution>
                 <goals>
                   <goal>check</goal>
                 </goals>

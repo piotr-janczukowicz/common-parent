@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
 
   <name>common-build-config</name>
-  <description>Shared Checkstyle and SpotBugs config loaded from the plugin classpath</description>
+  <description>Shared Checkstyle config loaded from the plugin classpath</description>
   <url>https://github.com/piotr-janczukowicz/common-parent</url>
   <licenses>
     <license>
@@ -16,6 +16,14 @@
       <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
+
+  <developers>
+    <developer>
+      <id>piotr-janczukowicz</id>
+      <name>Piotr Janczukowicz</name>
+      <email>pjanczukowicz@gmail.com</email>
+    </developer>
+  </developers>
 
   <scm>
     <connection>scm:git:https://github.com/piotr-janczukowicz/common-parent.git</connection>
@@ -33,4 +41,76 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <profiles>
+    <profile>
+      <!-- This module has no parent, so it repeats the central profile of common-parent (same plugin versions). The jar holds
+           resources only, so the sources and javadoc jars Central requires are built from the resources and a README. The
+           Central plugin collects both modules of the reactor into one deployment. -->
+      <id>central</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.5.1</version>
+            <executions>
+              <execution>
+                <id>sources-jar</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <classifier>sources</classifier>
+                  <classesDirectory>${project.basedir}/src/main/resources</classesDirectory>
+                </configuration>
+              </execution>
+              <execution>
+                <id>javadoc-jar</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <classifier>javadoc</classifier>
+                  <classesDirectory>${project.basedir}/src/main/javadoc</classesDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.8</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.11.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>true</autoPublish>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

@@ -54,7 +54,7 @@ jobs:
           mvn -B -s .github/maven-settings.xml versions:set -DnewVersion=${{ steps.version.outputs.release }} -DprocessAllModules -DgenerateBackupPoms=false
           mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion=${{ steps.version.outputs.release }} -DgenerateBackupPoms=false
       - name: Deploy to GitHub Packages
-        run: mvn -B -s .github/maven-settings.xml deploy -DdeployAtEnd=false -Prelease
+        run: mvn -B -s .github/maven-settings.xml deploy -DdeployAtEnd=false -Prelease -Dproject.build.outputTimestamp="$(git log -1 --format=%cI)"
       - name: Tag and create GitHub release
         run: gh release create "v${{ steps.version.outputs.release }}" --target "$GITHUB_SHA" --generate-notes
         env:

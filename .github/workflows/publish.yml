@@ -16,7 +16,7 @@ on:
         description: Extra Maven arguments
         required: false
         type: string
-        default: -pl .
+        default: ""
       sync-build-config:
         description: Also set common-build-config.version (common-parent only)
         required: false
@@ -89,4 +89,4 @@ jobs:
             mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion="$VERSION" -DgenerateBackupPoms=false
           fi
       - name: Publish to Maven Central
-        run: mvn -B -s .github/maven-settings.xml deploy -Pcentral -Prelease -Dgpg.keyname=E1A4492D376821D0680C6C758D93BEA6026504E0 $MAVEN_EXTRA_ARGS
+        run: mvn -B -s .github/maven-settings.xml deploy -Pcentral -Prelease -Dgpg.keyname=E1A4492D376821D0680C6C758D93BEA6026504E0 -Dproject.build.outputTimestamp="$(git log -1 --format=%cI)" $MAVEN_EXTRA_ARGS
