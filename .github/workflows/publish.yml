@@ -2,7 +2,7 @@ name: Publish to Maven Central
 
 # Publishes a version that the Release workflow (or a manual release) already tagged: it checks out the tag, builds
 # and signs it, and uploads it to Maven Central. Other repositories call it with:
-#   uses: piotr-janczukowicz/common-parent/.github/workflows/publish.yml@main
+#   uses: piotr-janczukowicz/common-parent/.github/workflows/publish.yml@<commit sha of a vN tag> # vN
 #   with: { tag: "${{ inputs.tag }}" }
 #   secrets: inherit
 on:
