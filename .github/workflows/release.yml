@@ -1,11 +1,9 @@
 name: Release
 
-# Deploys the next integer version to GitHub Packages, tags it and creates the GitHub release. The version is the
-# newest vN tag plus one (or the N-SNAPSHOT of the pom when that is higher); nothing is pushed to main, so branch
-# protection stays on. It runs on every merge to main; common-parent is the only repository that releases automatically.
+# Run by hand on main. Deploys the next integer version to GitHub Packages, tags it and creates the GitHub release. The
+# version is the newest vN tag plus one (or the N-SNAPSHOT of the pom when that is higher); nothing is pushed to main,
+# so branch protection stays on. Publishing to Maven Central is a separate workflow that takes the tag.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
