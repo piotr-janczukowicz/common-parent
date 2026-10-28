@@ -2,7 +2,7 @@ name: Release
 
 # Run by hand on main. Deploys the next integer version to GitHub Packages, tags it and creates the GitHub release. The
 # version is the newest vN tag plus one (or the N-SNAPSHOT of the pom when that is higher); nothing is pushed to main,
-# so branch protection stays on. Publishing to Maven Central is a separate workflow that takes the tag.
+# so branch protection stays on: the next N-SNAPSHOT version goes into a pull request that is merged by hand. Publishing to Maven Central is a separate workflow that takes the tag.
 on:
   workflow_dispatch:
 
@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      pull-requests: write
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -59,5 +60,21 @@ jobs:
         run: mvn -B -s .github/maven-settings.xml deploy -DdeployAtEnd=false -Prelease -Dproject.build.outputTimestamp="$(git log -1 --format=%cI)"
       - name: Tag and create GitHub release
         run: gh release create "v${{ steps.version.outputs.release }}" --target "$GITHUB_SHA" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Open pull request for the next snapshot version
+        run: |
+          release="${{ steps.version.outputs.release }}"
+          next="$(( release + 1 ))-SNAPSHOT"
+          branch="release/next-${next}"
+          git checkout -- .
+          git checkout -b "$branch"
+          mvn -B -s .github/maven-settings.xml versions:set -DnewVersion="$next" -DprocessAllModules -DgenerateBackupPoms=false
+          mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion="$next" -DgenerateBackupPoms=false
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: start ${next}"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" --title "chore: start ${next}" --body "Version bump after release v${release}."
         env:
           GH_TOKEN: ${{ github.token }}
