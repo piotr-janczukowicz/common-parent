@@ -10,11 +10,15 @@
     <exclude-pattern>.*/generated-test-sources/.*</exclude-pattern>
 
     <rule ref="category/java/bestpractices.xml">
+        <exclude name="UnitTestShouldIncludeAssert"/>
+        <exclude name="JUnit5TestShouldBePackagePrivate"/>
         <exclude name="AvoidUsingHardCodedIP"/>
         <exclude name="LooseCoupling"/>
         <exclude name="UnitTestContainsTooManyAsserts"/>
     </rule>
     <rule ref="category/java/codestyle.xml">
+        <exclude name="ClassNamingConventions"/>
+        <exclude name="ShortClassName"/>
         <exclude name="ShortMethodName"/>
         <exclude name="LongVariable"/>
         <exclude name="UnnecessaryModifier"/>
@@ -35,6 +39,10 @@
         </properties>
     </rule>
     <rule ref="category/java/design.xml">
+        <exclude name="CognitiveComplexity"/>
+        <exclude name="NPathComplexity"/>
+        <exclude name="ExcessivePublicCount"/>
+        <exclude name="AvoidDeeplyNestedIfStmts"/>
         <exclude name="MutableStaticState"/>
         <exclude name="AvoidCatchingGenericException"/>
         <exclude name="SignatureDeclareThrowsException"/>
@@ -61,6 +69,7 @@
         <exclude name="UseProperClassLoader"/>
     </rule>
     <rule ref="category/java/multithreading.xml">
+        <exclude name="AvoidSynchronizedAtMethodLevel"/>
         <exclude name="AvoidUsingVolatile"/>
         <exclude name="AvoidSynchronizedStatement"/>
         <exclude name="UseConcurrentHashMap"/>

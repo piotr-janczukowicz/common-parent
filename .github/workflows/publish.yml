@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Tag to publish, such as v6
+        description: Tag to publish, such as v6 or v2026.3.10.0
         required: true
         type: string
       maven-args:
@@ -46,6 +46,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: release
     timeout-minutes: 45
     env:
       GITHUB_ACTOR: ${{ github.actor }}
@@ -60,15 +61,15 @@ jobs:
     steps:
       - name: Check the tag
         run: |
-          if [[ ! "$TAG" =~ ^v([0-9]+)$ ]]; then
-            echo "::error::The tag must look like v6, found '$TAG'"
+          if [[ ! "$TAG" =~ ^v([0-9]+(\.[0-9]+)*)$ ]]; then
+            echo "::error::The tag must look like v6 or v2026.3.10.0, found '$TAG'"
             exit 1
           fi
           echo "VERSION=${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: refs/tags/${{ inputs.tag }}
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
           java-version: "21"
