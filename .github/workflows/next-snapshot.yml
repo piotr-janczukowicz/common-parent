@@ -1,0 +1,72 @@
+name: Next snapshot
+
+# Opens a pull request that moves the poms to the next N-SNAPSHOT after the release of the given tag. Called by the
+# Release workflow, and can be run by hand with the tag to retry. Safe to run again: it reuses an existing branch and
+# pull request, and does nothing when main has already moved past the release.
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Released tag, such as v11
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: next-snapshot
+  cancel-in-progress: false
+
+jobs:
+  pull-request:
+    permissions:
+      contents: write
+      pull-requests: write
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ github.token }}
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          server-id: github
+      - name: Open or update the pull request
+        run: |
+          if [[ ! "$TAG" =~ ^v([0-9]+)$ ]]; then
+            echo "::error::Expected a tag like v11, found '$TAG'"
+            exit 1
+          fi
+          release=${BASH_REMATCH[1]}
+          next="$(( release + 1 ))-SNAPSHOT"
+          current=$(mvn -B -s .github/maven-settings.xml -q help:evaluate -Dexpression=project.version -DforceStdout)
+          cur_n=${current%-SNAPSHOT}
+          if [[ "$cur_n" =~ ^[0-9]+$ ]] && (( cur_n > release )); then
+            echo "main is already at $current"
+            exit 0
+          fi
+          branch="release/next-${next}"
+          git checkout -b "$branch"
+          mvn -B -s .github/maven-settings.xml versions:set -DnewVersion="$next" -DprocessAllModules -DgenerateBackupPoms=false
+          mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion="$next" -DgenerateBackupPoms=false
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: start ${next}"
+          git push --force origin "$branch"
+          if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')" ]; then
+            gh pr create --base main --head "$branch" --title "chore: start ${next}" --body "Version bump after release ${TAG}."
+          fi
