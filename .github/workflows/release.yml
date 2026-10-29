@@ -1,8 +1,13 @@
-name: Release
+name: Release (manual)
 
 # Run by hand on main. Deploys the next integer version to GitHub Packages, tags it and creates the GitHub release. The
 # version is the newest vN tag plus one (or the N-SNAPSHOT of the pom when that is higher); nothing is pushed to main,
-# so branch protection stays on: the next N-SNAPSHOT version goes into a pull request that is merged by hand. It is a separate job, so "Re-run failed jobs" retries it without touching the tag. Publishing to Maven Central is a separate workflow that takes the tag.
+# so branch protection stays on: the next N-SNAPSHOT version goes into a pull request that is merged by hand. The
+# release profile skips tests and checks, so the deploy waits for a green Main run of the same commit. Deploy and tag
+# are one job and next-snapshot is another, so "Re-run failed jobs" retries the pull request step without deploying
+# again. If the deploy itself fails after it uploaded some files, GitHub Packages may refuse the same version again:
+# delete that package version, then run the workflow again. Publishing to Maven Central is a separate workflow that
+# takes the tag.
 on:
   workflow_dispatch:
 
@@ -16,9 +21,9 @@ concurrency:
 jobs:
   release:
     permissions:
+      actions: read
       contents: write
       packages: write
-      pull-requests: write
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -27,6 +32,15 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }}
       PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
     steps:
+      - name: Fail unless Main passed on this commit
+        run: |
+          passed=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow main.yml --commit "$GITHUB_SHA" --status success --json databaseId --jq length)
+          if [ "$passed" -lt 1 ]; then
+            echo "::error::No successful Main run for $GITHUB_SHA; wait for it to pass before releasing"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
@@ -37,7 +51,7 @@ jobs:
       - name: Resolve release version
         id: version
         run: |
-          current=$(mvn -B -s .github/maven-settings.xml -q help:evaluate -Dexpression=project.version -DforceStdout)
+          current=$(mvn -B -ntp -s .github/maven-settings.xml -q help:evaluate -Dexpression=project.version -DforceStdout)
           if [[ ! "$current" =~ ^([0-9]+)-SNAPSHOT$ ]]; then
             echo "::error::Expected version N-SNAPSHOT with integer N, found '$current'"
             exit 1
@@ -54,10 +68,10 @@ jobs:
           fi
       - name: Set release version
         run: |
-          mvn -B -s .github/maven-settings.xml versions:set -DnewVersion=${{ steps.version.outputs.release }} -DprocessAllModules -DgenerateBackupPoms=false
-          mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion=${{ steps.version.outputs.release }} -DgenerateBackupPoms=false
+          mvn -B -ntp -s .github/maven-settings.xml versions:set -DnewVersion=${{ steps.version.outputs.release }} -DprocessAllModules -DgenerateBackupPoms=false
+          mvn -B -ntp -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion=${{ steps.version.outputs.release }} -DgenerateBackupPoms=false
       - name: Deploy to GitHub Packages
-        run: mvn -B -s .github/maven-settings.xml deploy -DdeployAtEnd=false -Prelease -Dproject.build.outputTimestamp="$(git log -1 --format=%cI)"
+        run: mvn -B -ntp -s .github/maven-settings.xml deploy -DdeployAtEnd=false -Prelease -Dproject.build.outputTimestamp="$(git log -1 --format=%cI)"
       - name: Tag and create GitHub release
         run: gh release create "v${{ steps.version.outputs.release }}" --target "$GITHUB_SHA" --generate-notes
         env:
@@ -70,6 +84,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: ./.github/workflows/next-snapshot.yml
+    uses: ./.github/workflows/reusable-next-snapshot.yml
     with:
       tag: v${{ needs.release.outputs.release }}

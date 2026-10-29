@@ -1,4 +1,4 @@
-name: Next snapshot
+name: Next snapshot (reusable, or manual to retry)
 
 # Opens a pull request that moves the poms to the next [X.Y.Z.]N-SNAPSHOT after the release of the given tag. Called by the
 # Release workflow, and can be run by hand with the tag to retry. Safe to run again: it reuses an existing branch and
