@@ -61,15 +61,24 @@ jobs:
           fi
           prefix=${BASH_REMATCH[1]}
           floor=${BASH_REMATCH[3]}
-          last=$(git ls-remote --tags --refs origin "refs/tags/v${prefix}*" | sed -E "s#.*refs/tags/v${prefix//./[.]}##" | grep -E '^[0-9]+$' | sort -n | tail -1 || true)
+          # A failed query must stop the release: reading it as "no tags yet" could deploy a version that exists.
+          if ! tags=$(git ls-remote --tags --refs origin "refs/tags/v${prefix}*"); then
+            echo "::error::Could not list the tags of origin"
+            exit 1
+          fi
+          # grep exits 1 when no tag has a number after the prefix; that is an empty result, not a failure.
+          last=$(printf '%s\n' "$tags" | sed -E "s#.*refs/tags/v${prefix//./[.]}##" | { grep -E '^[0-9]+$' || true; } | sort -n | tail -1)
           if [ -z "$last" ]; then revision=$floor; else revision=$(( floor > last ? floor : last + 1 )); fi
           echo "release=${prefix}${revision}" >> "$GITHUB_OUTPUT"
       - name: Fail if tag exists
         run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/v$RELEASE"; then
-            echo "::error::Tag v$RELEASE already exists"
-            exit 1
-          fi
+          status=0
+          git ls-remote --exit-code --tags origin "refs/tags/v$RELEASE" > /dev/null || status=$?
+          case "$status" in
+            0) echo "::error::Tag v$RELEASE already exists"; exit 1 ;;
+            2) ;; # no such tag: the version is free
+            *) echo "::error::Could not query the tags of origin (git exit $status)"; exit 1 ;;
+          esac
         env:
           RELEASE: ${{ steps.version.outputs.release }}
       - name: Set release version
