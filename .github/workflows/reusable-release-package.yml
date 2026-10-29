@@ -1,4 +1,4 @@
-name: Release package (reusable)
+name: Release package
 
 # Deploys the next version of a library to GitHub Packages, tags it and creates the GitHub release. Reusable: every
 # repository calls it from its Release workflow, then calls reusable-next-snapshot.yml with `v` plus the version it returns. common-parent itself keeps its own
