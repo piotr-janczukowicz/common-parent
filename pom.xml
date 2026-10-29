@@ -4,7 +4,7 @@
 
   <groupId>io.github.piotr-janczukowicz</groupId>
   <artifactId>common-parent</artifactId>
-  <version>13-SNAPSHOT</version>
+  <version>14-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>common-parent</name>
@@ -47,7 +47,7 @@
 
   <properties>
     <!-- Must match this POM version. Plugin dependencies cannot use ${project.version}; that becomes the child's version. -->
-    <common-build-config.version>13-SNAPSHOT</common-build-config.version>
+    <common-build-config.version>14-SNAPSHOT</common-build-config.version>
     <!-- The Mockito agent (a dependency:properties value); every child tests with Mockito. -->
     <test.agent.args>-javaagent:${org.mockito:mockito-core:jar}</test.agent.args>
     <!-- Set in a child whose tests need extra JVM module flags, such as add-modules or add-opens. -->
