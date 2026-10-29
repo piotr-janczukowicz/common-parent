@@ -1,4 +1,4 @@
-name: Publish to Maven Central (reusable, or manual)
+name: Publish to Maven Central
 
 # Publishes a version that the Release workflow (or a manual release) already tagged: it checks out the tag, builds
 # and signs it, and uploads it to Maven Central. Other repositories call it with:

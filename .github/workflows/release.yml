@@ -1,4 +1,4 @@
-name: Release (manual)
+name: Release
 
 # Run by hand on main. Deploys the next integer version to GitHub Packages, tags it and creates the GitHub release. The
 # version is the newest vN tag plus one (or the N-SNAPSHOT of the pom when that is higher); nothing is pushed to main,
