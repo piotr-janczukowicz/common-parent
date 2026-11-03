@@ -515,6 +515,28 @@
       </properties>
     </profile>
     <profile>
+      <!-- Fails on the Javadoc errors that would fail the Central publish (the central profile builds the Javadoc jar), without building a site or a jar. -->
+      <id>javadoc</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${maven-javadoc-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>javadoc-check</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>javadoc-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <!-- Signs the artifacts and publishes them to Maven Central; activated by the release workflow. -->
       <id>central</id>
       <build>

@@ -84,5 +84,5 @@ jobs:
           if [[ "$SYNC_BUILD_CONFIG" == "true" ]]; then
             mvn -B -s .github/maven-settings.xml versions:set-property -Dproperty=common-build-config.version -DnewVersion="$VERSION" -DgenerateBackupPoms=false
           fi
-      - name: Publish to Maven Central (reusable, or manual)
+      - name: Publish to Maven Central
         run: mvn -B -s .github/maven-settings.xml deploy -Pcentral -Prelease -Dgpg.keyname=E1A4492D376821D0680C6C758D93BEA6026504E0 -Dproject.build.outputTimestamp="$(git log -1 --format=%cI)" $MAVEN_EXTRA_ARGS
