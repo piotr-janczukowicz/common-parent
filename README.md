@@ -17,12 +17,15 @@ release a library to Maven Central. Set it as the parent of a project and the sa
 <parent>
     <groupId>io.github.piotr-janczukowicz</groupId>
     <artifactId>common-parent</artifactId>
-    <version>13</version>
+    <version>LATEST_VERSION</version>
     <relativePath/>
 </parent>
 ```
 
-Versions are whole numbers (`13`); a library that has its own release line keeps the number as the last part, like
+Replace `LATEST_VERSION` with the version in the Maven Central badge at the top of this page, or with the newest entry on
+the [releases page](https://github.com/piotr-janczukowicz/common-parent/releases).
+
+Versions are whole numbers (`15`); a library that has its own release line keeps the number as the last part, like
 `2026.3.10.0`.
 
 ## What a project gets
@@ -45,8 +48,19 @@ Every check fails the build, so a module that passes `mvn verify` is formatted a
 - **tidy** checks that `pom.xml` is formatted. **Enforcer** (`verify`) requires Java `[21,22)` and Maven `3.9.0` or newer,
   forbids `<repositories>` in a project POM (use `settings.xml` or a mirror) and duplicate dependency versions.
 - **Checkstyle** with the configuration of [`common-build-config`](common-build-config), on modules with Java sources.
-- **PMD** with the ruleset in the module's own `pmd/pmd-ruleset.xml`, which each project owns. Add `-Ppmd-test` to run every
-  PMD rule on the test sources too, with the rules from `common-build-config`.
+- **PMD** with the ruleset in the module's own `pmd/pmd-ruleset.xml`, which each project owns. A module of API model types
+  can start from the shared `pmd-model-ruleset.xml` of `common-build-config` and exclude only what it must:
+
+  ```xml
+  <rule ref="pmd-model-ruleset.xml">
+    <exclude name="CyclomaticComplexity"/>
+  </rule>
+  ```
+
+  Add `-Ppmd-test` to run every PMD rule on the test sources too, with the rules from `common-build-config`.
+- **Parallel tests** are opt-in. Set `<junit.parallel.enabled>true</junit.parallel.enabled>` in a module whose test classes
+  share no state: surefire and failsafe then run the classes on `junit.parallel.threads` threads (4 by default) and the methods
+  of one class on one thread. Annotate a timing-sensitive class with `@Isolated`.
 - **JaCoCo** merges the unit-test and integration-test coverage and enforces these minimums, on the whole module and on every
   class:
 
@@ -93,6 +107,7 @@ jobs:
 | `reusable-release-package.yml` | Works out the next version, deploys it to GitHub Packages, tags it and creates the GitHub release. It waits for a green Main run of the same commit |
 | `reusable-next-snapshot.yml` | Opens the pull request that moves the POMs to the next `-SNAPSHOT` after a release |
 | `reusable-publish.yml` | Builds a tag, signs it and publishes it to Maven Central |
+| `reusable-python-checks.yml` | Runs a repository's Python checks (`bash scripts/ci_checks.sh` by default) on Python 3.14 |
 
 `common-parent` itself keeps its own `release.yml`: it also sets the `common-build-config.version` property and releases
 every module.
