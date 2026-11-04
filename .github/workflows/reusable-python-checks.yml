@@ -1,0 +1,35 @@
+name: Python checks
+
+# Runs the Python checks of a repository that generates code from an OpenAPI description. Other repositories call it with:
+#   uses: piotr-janczukowicz/common-parent/.github/workflows/reusable-python-checks.yml@<commit sha of a vN tag> # vN
+#   with: { command: "bash scripts/ci_checks.sh" }
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: The command that runs every check, from the repository root
+        required: false
+        default: bash scripts/ci_checks.sh
+        type: string
+      python-version:
+        description: The Python version to run the checks with
+        required: false
+        default: "3.14"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Python checks
+        run: ${{ inputs.command }}
