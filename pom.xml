@@ -372,6 +372,8 @@
           </dependencies>
           <configuration>
             <configLocation>checkstyle.xml</configLocation>
+            <!-- Outside target, so mvn clean keeps it and a clean build checks only the files that changed. -->
+            <cacheFile>${project.basedir}/.checkstyle-cache</cacheFile>
             <consoleOutput>true</consoleOutput>
             <failsOnError>true</failsOnError>
             <includeTestSourceDirectory>false</includeTestSourceDirectory>
