@@ -15,3 +15,7 @@ release.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# Spotless up-to-date index (kept outside target so mvn clean does not drop it)
+.spotless-index
+.checkstyle-cache

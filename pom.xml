@@ -372,6 +372,8 @@
           </dependencies>
           <configuration>
             <configLocation>checkstyle.xml</configLocation>
+            <!-- Outside target, so mvn clean keeps it and a clean build checks only the files that changed. -->
+            <cacheFile>${project.basedir}/.checkstyle-cache</cacheFile>
             <consoleOutput>true</consoleOutput>
             <failsOnError>true</failsOnError>
             <includeTestSourceDirectory>false</includeTestSourceDirectory>
@@ -383,6 +385,11 @@
           <artifactId>spotless-maven-plugin</artifactId>
           <version>${spotless-maven-plugin.version}</version>
           <configuration>
+            <!-- The index outside target survives mvn clean, so a clean build formats only the files that changed. -->
+            <upToDateChecking>
+              <enabled>true</enabled>
+              <indexFile>${project.basedir}/.spotless-index</indexFile>
+            </upToDateChecking>
             <formats>
               <format>
                 <includes>
