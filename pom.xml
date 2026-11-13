@@ -66,7 +66,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- Libraries -->
-    <jackson.version>3.2.4</jackson.version>
+    <jackson.version>3.3.0</jackson.version>
     <jspecify.version>1.0.1</jspecify.version>
     <okhttp.version>5.5.1</okhttp.version>
     <record.builder.version>53</record.builder.version>
@@ -84,7 +84,7 @@
 
     <!-- Plugins -->
     <checkstyle.version>14.4.0</checkstyle.version>
-    <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
+    <exec-maven-plugin.version>3.7.0</exec-maven-plugin.version>
     <jacoco.version>0.8.16</jacoco.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
@@ -105,8 +105,8 @@
     <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
     <palantir-java-format.version>2.97.0</palantir-java-format.version>
     <spotless-maven-plugin.version>3.11.0</spotless-maven-plugin.version>
-    <tidy-maven-plugin.version>1.4.1</tidy-maven-plugin.version>
-    <versions-maven-plugin.version>2.24.0</versions-maven-plugin.version>
+    <tidy-maven-plugin.version>1.5.0</tidy-maven-plugin.version>
+    <versions-maven-plugin.version>2.25.1</versions-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
