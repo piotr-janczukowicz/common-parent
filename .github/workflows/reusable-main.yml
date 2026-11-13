@@ -1,0 +1,80 @@
+name: Main checks
+
+# Verifies the default branch after a merge. The Release workflows wait for a green run of this workflow's caller (it
+# must be named main.yml) on the same commit, so it never skips anything. Other repositories call it from their Main workflow:
+#   on: { push: { branches: [main] } }
+#   concurrency: { group: main, cancel-in-progress: true }
+#   jobs:
+#     verify:
+#       uses: piotr-janczukowicz/common-parent/.github/workflows/reusable-main.yml@<commit sha of a vN tag> # vN
+#       secrets: inherit
+#       # with: { coverage-report: target/site/jacoco/jacoco.xml }   # uploads coverage to Codacy
+#       # with: { python-command: "bash scripts/ci_checks.sh" }      # repositories that also have Python checks
+on:
+  workflow_call:
+    inputs:
+      maven-args:
+        description: Extra Maven arguments
+        required: false
+        type: string
+        default: ""
+      coverage-report:
+        description: JaCoCo XML report to upload to Codacy; empty means no upload
+        required: false
+        type: string
+        default: ""
+      python-command:
+        description: Command for a separate Python checks job, from the repository root; empty means no such job
+        required: false
+        type: string
+        default: ""
+    secrets:
+      PACKAGES_TOKEN:
+        required: true
+      CODACY_PROJECT_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ github.token }}
+      PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+      MAVEN_EXTRA_ARGS: ${{ inputs.maven-args }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - run: mvn -B -ntp -s .github/maven-settings.xml clean verify $MAVEN_EXTRA_ARGS
+      - name: Upload coverage to Codacy
+        if: inputs.coverage-report != ''
+        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699 # v1.3.0
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: ${{ inputs.coverage-report }}
+
+  scripts:
+    if: inputs.python-command != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+      - name: Python checks
+        run: ${{ inputs.python-command }}
+        env:
+          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
