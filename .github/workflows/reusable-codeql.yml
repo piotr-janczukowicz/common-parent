@@ -14,7 +14,7 @@ on:
   workflow_call:
     secrets:
       PACKAGES_TOKEN:
-        required: true
+        required: false
 
 permissions:
   contents: read

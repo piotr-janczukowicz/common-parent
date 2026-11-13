@@ -30,7 +30,7 @@ on:
         default: ""
     secrets:
       PACKAGES_TOKEN:
-        required: true
+        required: false
       CODACY_PROJECT_TOKEN:
         required: false
 

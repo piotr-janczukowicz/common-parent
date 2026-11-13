@@ -12,8 +12,9 @@ name: Pull request checks
 #       secrets: inherit
 #       # with: { python-command: "bash scripts/ci_checks.sh" }   # repositories that also have Python checks
 # The javadoc profile checks what the Central publish would reject, so no second build of the Central bundle is needed.
-# Draft pull requests are skipped (a skipped job still satisfies a required check), and so are the Maven steps when the
-# pull request only changes Markdown files.
+# Draft pull requests are skipped (a skipped job still satisfies a required check). Markdown-only changes are still
+# built, because Spotless formats Markdown. The checks are named "<caller job> / verify" and "<caller job> / scripts"
+# (for example "verify / verify"), so a required status check must use that name.
 on:
   workflow_call:
     inputs:
@@ -29,7 +30,7 @@ on:
         default: ""
     secrets:
       PACKAGES_TOKEN:
-        required: true
+        required: false
 
 permissions:
   contents: read
@@ -48,23 +49,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          # The merge commit: HEAD^1 is the base branch, so two commits are enough to list the changed files.
-          fetch-depth: 2
-      - name: Classify the changes
-        id: changes
-        run: |
-          files=$(git diff --name-only HEAD^1 HEAD)
-          echo "$files"
-          if [ -z "$(echo "$files" | grep -vE '\.md$' || true)" ]; then docs=true; else docs=false; fi
-          echo "docs-only=$docs" >> "$GITHUB_OUTPUT"
-      - if: steps.changes.outputs.docs-only != 'true'
-        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - if: steps.changes.outputs.docs-only != 'true'
-        run: mvn -B -ntp -s .github/maven-settings.xml clean verify -Pjavadoc $MAVEN_EXTRA_ARGS
+      - run: mvn -B -ntp -s .github/maven-settings.xml clean verify -Pjavadoc $MAVEN_EXTRA_ARGS
 
   scripts:
     if: github.event.pull_request.draft == false && inputs.python-command != ''
