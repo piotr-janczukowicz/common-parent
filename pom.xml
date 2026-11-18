@@ -106,7 +106,7 @@
     <palantir-java-format.version>2.97.0</palantir-java-format.version>
     <spotless-maven-plugin.version>3.11.0</spotless-maven-plugin.version>
     <tidy-maven-plugin.version>1.5.0</tidy-maven-plugin.version>
-    <versions-maven-plugin.version>2.25.1</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.25.2</versions-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
