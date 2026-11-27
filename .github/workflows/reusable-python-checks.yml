@@ -3,6 +3,7 @@ name: Python checks
 # Runs the Python checks of a repository that generates code from an OpenAPI description. Other repositories call it with:
 #   uses: piotr-janczukowicz/common-parent/.github/workflows/reusable-python-checks.yml@<commit sha of a vN tag> # vN
 #   with: { command: "bash scripts/ci_checks.sh" }
+#   secrets: inherit
 on:
   workflow_call:
     inputs:
@@ -16,6 +17,9 @@ on:
         required: false
         default: "3.14"
         type: string
+    secrets:
+      PACKAGES_TOKEN:
+        required: false
 
 permissions:
   contents: read
@@ -33,3 +37,5 @@ jobs:
           python-version: ${{ inputs.python-version }}
       - name: Python checks
         run: ${{ inputs.command }}
+        env:
+          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
